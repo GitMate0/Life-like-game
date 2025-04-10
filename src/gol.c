@@ -76,7 +76,7 @@ void gol_map_clean(GOL_MAP map) {
 }
 
 static float phase = 0; // phase of color animation
-static float speed = 0.1;
+static float speed = 0.1; // speed of color animation
 
 // render map
 void gol_map_render(GOL_STATE state) {
@@ -104,8 +104,8 @@ void gol_map_render(GOL_STATE state) {
 						state.live.fg : 
 						state.dead.fg;
 						
-				size_t remain = state.cell_bytes + 2 * C24_FMAX + ENDCMAX; // size of memory for one colored cell string element
-				ptr += snprintcpf(ptr, remain, COLORP_C(bg, fg), "%s", cell); // write colored cell string element to screen buffer
+				size_t color_cell_str_size = state.cell_bytes + 2 * C24_FMAX + ENDCMAX; // size of memory for one colored cell string element
+				ptr += snprintcpf(ptr, color_cell_str_size, COLORP_C(bg, fg), "%s", cell); // write colored cell string element to screen buffer
 			} else {
 				ptr += snprintf(ptr, state.cell_bytes, "%s", cell); // write uncolored cell string element to screen buffer
 			}

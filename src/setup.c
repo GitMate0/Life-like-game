@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <uniwidth.h>
 #include <getopt.h>
 #include <stdint.h>
 #include <ctype.h>
@@ -14,8 +15,10 @@
 void gol_map_setup(GOL_STATE *state) {
 	uint16_t cols, lines;
 	term_resolution(&cols, &lines);
-	size_t scale = max_u8_strlen(state->live.str, state->dead.str); // map width divider
-	gol_map_init(&state->map, cols / scale, lines - 1);
+	size_t s1w = u8_strwidth((uint8_t*)state->live.str, ""); // true char len live cell string
+	size_t s2w = u8_strwidth((uint8_t*)state->dead.str, ""); // true char len dead cell string
+	state->cell_scale = MAX(s1w, s2w); // map width divider or max char len cell string
+	gol_map_init(&state->map, cols / state->cell_scale, lines - 1);
 	gol_map_rand(state->map, state->seed);
 }
 
@@ -129,7 +132,9 @@ void gol_opt_parse(GOL_STATE *state, int argc, char **argv) {
 void gol_setup(GOL_STATE *state, int argc, char **argv) {
 	// setup game state from shell options
 	gol_opt_parse(state, argc, argv);
-	state->cell_bytes = max_strlen(state->live.str, state->dead.str) + 1; // max byte size of cell string
+	size_t s1l = strlen(state->live.str);
+	size_t s2l = strlen(state->dead.str);
+	state->cell_bytes = MAX(s1l, s2l) + 1; // max byte size of cell string
 	gol_map_setup(state); // set map
 	// set screen buffer
 	size_t colored_cell_string_size = state->cell_bytes + 2 * C24_FMAX + ENDCMAX;

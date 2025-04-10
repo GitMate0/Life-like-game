@@ -23,15 +23,3 @@ int strsat(char *str, int (*func)(int)) {
 	}
 	return 1;
 }
-
-size_t max_u8_strlen(char *s1, char *s2) {
-	size_t s1w = u8_strwidth((uint8_t*)s1, "");
-	size_t s2w = u8_strwidth((uint8_t*)s2, "");
-	return MAX(s1w, s2w);
-}
-
-size_t max_strlen(char *s1, char *s2) {
-	size_t s1l = strlen(s1);
-	size_t s2l = strlen(s2);
-	return MAX(s1l, s2l);
-}

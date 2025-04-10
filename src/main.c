@@ -54,15 +54,16 @@ int main(int argc, char **argv) {
 	
 	tcgetattr(STDIN_FILENO, &original);
 	set_raw_mode(0, 0);
-	uint16_t cell_scale = max_u8_strlen(state.live.str, state.dead.str);
 	uint16_t cur_map_x = state.map.w / 2;
 	uint16_t cur_map_y = state.map.h / 2;
-	uint16_t cur_x = cur_map_x * cell_scale + 1;
+	uint16_t cur_x = cur_map_x * state.cell_scale + 1;
 	uint16_t cur_y = cur_map_y;
 	
 	//HIDE_CUR();
 	CLRSCR();
 	char key;
+	char info = 1;
+	uint64_t gen = 0;
 	while (LOOP) {
 		//if (!PAUSE) {
 			RESET_CUR();
@@ -77,6 +78,9 @@ int main(int argc, char **argv) {
 				case 'p':
 					PAUSE ^= 1;
 					break;
+				case 'i':
+					info ^= 1;
+					break;
 				case '-':
 					if (DELAY != 0)
 						DELAY -= 5000;
@@ -86,10 +90,13 @@ int main(int argc, char **argv) {
 						DELAY += 5000;
 					break;
 				case 'r':
+					gen = 0;
 					state.seed = (uint32_t)time(NULL);
 					gol_map_rand(state.map, state.seed);
 					break;
 				case 'c':
+					gen = 0;
+					state.seed = 0;
 					gol_map_clean(state.map);
 					break;
 				// map edit
@@ -103,11 +110,11 @@ int main(int argc, char **argv) {
 					break;
 				case 'a':
 					cur_map_x = MAX(cur_map_x - 1, 0);
-					cur_x = cur_map_x * cell_scale + 1;
+					cur_x = cur_map_x * state.cell_scale + 1;
 					break;
 				case 'd':
 					cur_map_x = MIN(cur_map_x + 1, state.map.w - 1);
-					cur_x = cur_map_x * cell_scale + 1;
+					cur_x = cur_map_x * state.cell_scale + 1;
 					break;
 				case ' ':
 					gol_map_set(state.map, cur_map_x, cur_map_y);
@@ -116,14 +123,27 @@ int main(int argc, char **argv) {
 					break;
 			}
 		}
+		RESET_CUR();
+		if (info) {
+			printcf(BG, COLOR_C(0x0),
+			"SEED: %d\n"
+			"GENERATION: %d\n"
+			"STATE: %s\n"
+			"CURSOR:\n"
+			"X - %d\n"
+			"Y - %d\n"
+			"DELAY - %d sec",
+			state.seed, gen,
+			PAUSE ? "PAUSE" : "RUN",
+			cur_map_x, cur_map_y, DELAY);
+		}
+		
+		MOVE_CUR(cur_y, cur_x);
+		fflush(stdout);
+		
 		if (!PAUSE) {
 			gol_next(state);
-		} else {
-			RESET_CUR();
-			printcf(BG, COLOR_C(0x0), "X - %d; Y - %d; DELAY - %d sec", cur_map_x, cur_map_y, DELAY);
-			MOVE_CUR(cur_y, cur_x);
-			fflush(stdout);
-			fflush(stdin);
+			gen++;
 		}
 		usleep(DELAY);
 	}

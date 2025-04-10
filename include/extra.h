@@ -16,8 +16,4 @@ int cins(char, char *);
 // string satisfies the condition?
 int strsat(char *, int (*)(int));
 
-size_t max_u8_strlen(char*, char*);
-
-size_t max_strlen(char*, char*);
-
 #endif

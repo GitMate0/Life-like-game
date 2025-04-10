@@ -24,6 +24,7 @@ typedef struct {
 	COLSTR live;
 	COLSTR dead;
 	// screen buffer
+	uint8_t cell_scale;
 	uint8_t cell_bytes;
 	char *screen_buffer;
 	// switches
